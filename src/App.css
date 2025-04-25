@@ -1,0 +1,238 @@
+/* App.css */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: #fff;
+  background-color: #111;
+  overflow: hidden;
+  display: flex;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.three-mount {
+  flex-grow: 1;
+  height: 100%;
+  display: block;
+  position: relative;
+  /* Debugging styles */
+  border: 3px dashed red;
+  background-color: rgba(0, 50, 0, 0.3);
+}
+
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(40, 40, 60, 0.9);
+  padding: 25px 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+  z-index: 20;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.setup-overlay {
+  /* No specific styles needed currently */
+}
+
+.results-overlay {
+  background-color: rgba(30, 30, 30, 0.9);
+  border: 2px solid #4CAF50;
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+  z-index: 100;
+}
+
+.overlay h1,
+.overlay h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.8em;
+  color: #eee;
+}
+
+.results-overlay h2 {
+  color: #4CAF50;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.input-group input[type="number"],
+.input-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #555;
+  background-color: #222;
+  color: #eee;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+
+.input-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.action-button {
+  padding: 12px 25px;
+  font-size: 1.1em;
+  cursor: pointer;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.action-button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.restart-button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: #555;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.restart-button:hover {
+  background-color: #666;
+}
+
+.error-message {
+  color: #ff6666;
+  font-size: 0.9em;
+  margin-top: 10px;
+  min-height: 1.2em;
+}
+
+.winner-list p {
+  font-size: 1.8em;
+  margin: 10px 0;
+  color: #eee;
+}
+
+.winner-list span {
+  font-weight: bold;
+  color: #fff;
+}
+
+.results-overlay small {
+  margin-top: 20px;
+  display: block;
+  color: #aaa;
+}
+
+.live-ranking {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 8px 15px;
+  border-radius: 8px;
+  z-index: 50;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #eee;
+  font-size: 0.9em;
+  min-width: 150px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+.live-ranking.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.live-ranking h3 {
+  margin: 0 0 5px 0;
+  font-size: 1em;
+  color: #4CAF50;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 3px;
+}
+
+.live-ranking p {
+  margin: 4px 0;
+  font-size: 0.9em;
+}
+
+.live-ranking span {
+  font-weight: bold;
+  color: #fff;
+}
+
+.tooltip {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  white-space: nowrap;
+  z-index: 101;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+}
