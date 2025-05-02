@@ -7,41 +7,33 @@ body {
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   color: #fff;
   background-color: #111;
-  overflow: hidden; /* 전체 페이지 스크롤 방지 */
+  overflow: hidden;
   display: flex;
-  touch-action: none; /* 모바일에서 의도치 않은 스크롤/줌 방지 */
+  touch-action: none;
 }
-
-/* 루트 요소 전체 화면 사용 */
 #root {
   width: 100%;
-  height: 100vh; /* 뷰포트 높이 사용 */
+  height: 100vh;
   display: flex;
 }
-
-/* 앱 컨테이너: Flex 컬럼, 상대 위치 지정 */
 .app-container {
   display: flex;
-  flex-direction: column; /* 자식 요소(캔버스, 오버레이)를 수직 정렬 */
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  position: relative; /* 오버레이의 absolute 위치 기준점 */
-  background-color: #111; /* Ensure container has background */
+  position: relative;
+  background-color: #111;
 }
-
-/* Three.js 캔버스가 마운트될 div */
 .three-mount {
-  flex-grow: 1; /* 사용 가능한 모든 수직 공간 차지 */
-  min-height: 0; /* Allow shrinking in flex container */
+  flex-grow: 1;
+  min-height: 0;
   display: block;
   position: relative;
-  /* background-color: #0a0a1a; */ /* Optional debug background */
 }
 
-/* 오버레이 공통 스타일 */
+/* 오버레이 공통 */
 .overlay {
   position: absolute;
-  /* 데스크탑: 중앙 정렬 */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -53,75 +45,64 @@ body {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
   text-align: center;
   transition: opacity 0.5s ease-out, visibility 0.5s ease-out, top 0.3s ease-out,
-    transform 0.3s ease-out; /* Animate position changes */
-  z-index: 20; /* 기본 오버레이 z-index */
+    transform 0.3s ease-out;
+  z-index: 20;
   max-height: 90vh;
-  overflow-y: auto; /* 내용 많을 시 스크롤 */
+  overflow-y: auto;
 }
-
 .overlay.hidden {
   opacity: 0;
   visibility: hidden;
-  pointer-events: none; /* 숨겨졌을 때 클릭 방지 */
+  pointer-events: none;
 }
-
-/* 설정 오버레이 (특별한 스타일은 현재 없음) */
 .setup-overlay {
 }
-
-/* 결과 오버레이 스타일 */
 .results-overlay {
   background-color: rgba(30, 30, 30, 0.9);
   border: 2px solid #4caf50;
   box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
-  z-index: 30; /* 설정 오버레이보다 위에 표시 (툴팁보다 낮게) */
+  z-index: 30;
 }
-
-/* 오버레이 제목 스타일 */
 .overlay h1,
 .overlay h2 {
   margin: 0 0 20px 0;
   font-size: 1.8em;
   color: #eee;
 }
-
 .results-overlay h2 {
   color: #4caf50;
   font-size: 2.5em;
   margin-bottom: 20px;
 }
 
-/* 입력 그룹 스타일 */
+/* 입력 그룹 */
 .input-group {
   margin-bottom: 15px;
   text-align: left;
 }
-
 .input-group label {
   display: block;
   margin-bottom: 5px;
   font-size: 0.9em;
   color: #ccc;
 }
-
 .input-group input[type="number"],
 .input-group textarea {
   width: 100%;
-  padding: 10px 8px; /* 모바일 터치 용이하게 패딩 조정 */
+  padding: 10px 8px;
   border: 1px solid #555;
   background-color: #222;
   color: #eee;
   border-radius: 4px;
   box-sizing: border-box;
-  font-size: 1rem; /* rem 단위 사용 권장 */
+  font-size: 1rem;
 }
-
 .input-group textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-/* 버튼 공통 스타일 */
+/* 버튼 */
 .action-button,
 .restart-button {
   padding: 12px 20px;
@@ -135,53 +116,46 @@ body {
   border-radius: 5px;
   transition: background-color 0.3s;
   margin-top: 10px;
-  -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
+  -webkit-tap-highlight-color: transparent;
 }
-
 .action-button {
   background-color: #4caf50;
-} /* 시작 버튼 색상 */
+}
 .restart-button {
   background-color: #555;
-  margin-top: 15px;
-  margin-bottom: 5px;
-} /* 재시작 버튼 색상 */
-
+  margin-top: 8px;
+  margin-bottom: 8px;
+  width: 80%;
+  max-width: 250px;
+}
 .action-button:hover:not(:disabled) {
   background-color: #45a049;
 }
 .restart-button:hover {
   background-color: #666;
 }
-
 .action-button:disabled {
-  /* 비활성화 시 스타일 */
   background-color: #cccccc;
   color: #666666;
   cursor: not-allowed;
 }
 
-/* 오류 메시지 스타일 */
+/* 기타 UI */
 .error-message {
   color: #ff6666;
   font-size: 0.9em;
   margin-top: 10px;
   min-height: 1.2em;
 }
-
-/* 결과 목록 스타일 */
 .winner-list p {
   font-size: 1.8em;
   margin: 10px 0;
   color: #eee;
 }
-
 .winner-list span {
   font-weight: bold;
   color: #fff;
 }
-
-/* 결과 오버레이 하단 안내 문구 */
 .results-overlay small {
   margin-top: 15px;
   display: block;
@@ -189,15 +163,15 @@ body {
   font-size: 0.85em;
 }
 
-/* 실시간 순위 표시 스타일 */
+/* 실시간 순위 */
 .live-ranking {
   position: absolute;
-  top: 10px; /* 데스크탑 기본 위치: 좌측 상단 */
+  top: 10px;
   left: 10px;
   background-color: rgba(0, 0, 0, 0.7);
   padding: 6px 12px;
   border-radius: 6px;
-  z-index: 50; /* 오버레이보다 높고 툴팁보다 낮게 */
+  z-index: 50;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #eee;
   font-size: 0.85em;
@@ -205,14 +179,12 @@ body {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
-  pointer-events: none; /* 클릭/터치 방지 */
+  pointer-events: none;
 }
-
 .live-ranking.visible {
   opacity: 1;
   visibility: visible;
 }
-
 .live-ranking h3 {
   margin: 0 0 4px 0;
   font-size: 0.9em;
@@ -221,127 +193,140 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 2px;
 }
-
 .live-ranking p {
   margin: 3px 0;
   font-size: 0.9em;
 }
-
 .live-ranking span {
   font-weight: bold;
   color: #fff;
 }
 
-/* 시간 멈춤 알림 스타일 */
-.time-freeze-notice {
+/* 알림 메시지 공통 (하단 중앙 배치, 약간 위에서부터 쌓임) */
+.time-freeze-notice,
+.knock-back-notice,
+.first-to-last-notice,
+.speed-boost-notice {
   position: absolute;
-  bottom: 20px; /* 화면 하단 중앙 */
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(255, 87, 34, 0.85); /* 눈에 띄는 주황색 */
   color: white;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 1.1em;
   font-weight: bold;
   text-align: center;
-  z-index: 55; /* 라이브 랭킹보다 약간 위에 */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  pointer-events: none; /* 클릭 방지 */
-  white-space: nowrap; /* 메시지가 길어도 한 줄로 표시 */
+  pointer-events: none;
+  white-space: nowrap;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
-
-.time-freeze-notice.visible {
+.time-freeze-notice.visible,
+.knock-back-notice.visible,
+.first-to-last-notice.visible,
+.speed-boost-notice.visible {
   opacity: 1;
   visibility: visible;
 }
 
-/* 툴팁 스타일 */
+/* 개별 알림 스타일 (배경색, 위치, z-index) */
+.time-freeze-notice {
+  z-index: 55;
+  bottom: 20px;
+  background-color: rgba(255, 87, 34, 0.85); /* 주황 */
+}
+.knock-back-notice {
+  z-index: 56;
+  bottom: 65px;
+  background-color: rgba(103, 58, 183, 0.85); /* 보라 */
+}
+.first-to-last-notice {
+  z-index: 57;
+  bottom: 110px;
+  background-color: rgba(211, 47, 47, 0.9); /* 빨강 */
+}
+.speed-boost-notice {
+  z-index: 58;
+  bottom: 155px;
+  background-color: rgba(3, 169, 244, 0.85); /* 파랑 */
+}
+
+/* 툴팁 */
 .tooltip {
-  position: fixed; /* 화면 기준 위치 고정 */
-  background-color: rgba(0, 0, 0, 0.8); /* 약간 더 진하게 */
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 5px 10px;
   border-radius: 4px;
   font-size: 0.9em;
   white-space: nowrap;
-  z-index: 100; /* 최상단에 표시 */
-  pointer-events: none; /* 툴팁 자체는 클릭되지 않도록 */
+  z-index: 100;
+  pointer-events: none;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s;
 }
-
 .tooltip.visible {
   opacity: 1;
   visibility: visible;
 }
 
-/* --- 반응형 디자인: 모바일 화면 (예: 600px 이하) --- */
+/* --- 반응형 디자인 --- */
 @media (max-width: 600px) {
   .overlay {
-    /* 모바일: 상단으로 이동, 너비 확장 */
-    top: 10px; /* 화면 상단에 더 가깝게 */
-    transform: translateX(-50%); /* 수평 중앙 정렬만 */
-    width: 95%; /* 너비 거의 꽉 차게 */
-    max-width: none; /* 최대 너비 제한 해제 */
-    padding: 15px; /* 내부 여백 축소 */
-    max-height: 45vh; /* 높이 제한을 더 줄여서 캔버스 공간 확보 */
-    /* overflow-y: auto; 유지 */
+    top: 10px;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: none;
+    padding: 15px;
+    max-height: 45vh;
   }
-
   .overlay h1,
   .overlay h2 {
-    font-size: 1.5em; /* 헤딩 크기 축소 */
+    font-size: 1.5em;
     margin-bottom: 15px;
   }
-
   .results-overlay h2 {
-    font-size: 2em; /* 결과 제목 크기 조정 */
+    font-size: 2em;
   }
-
   .winner-list p {
-    font-size: 1.3em; /* 결과 텍스트 크기 축소 */
+    font-size: 1.3em;
     margin: 8px 0;
   }
-
   .input-group label {
     font-size: 0.8em;
   }
-
   .input-group input[type="number"],
   .input-group textarea {
-    font-size: 0.9rem; /* 폰트 크기 조정 */
-    padding: 10px 8px; /* 패딩 조정 */
+    font-size: 0.9rem;
+    padding: 10px 8px;
   }
-
   .input-group textarea {
-    min-height: 70px; /* 텍스트 영역 최소 높이 축소 */
+    min-height: 70px;
   }
-
   .action-button,
   .restart-button {
-    padding: 10px 15px; /* 버튼 패딩 조정 */
-    font-size: 1em; /* 버튼 폰트 크기 */
-    width: 85%; /* 버튼 너비 확장 */
-    max-width: 300px; /* 최대 너비 제한 */
+    padding: 10px 15px;
+    font-size: 1em;
+    width: 85%;
+    max-width: 300px;
     box-sizing: border-box;
   }
-
-  /* 라이브 랭킹 위치/크기 조정 */
+  .restart-button {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
   .live-ranking {
-    top: 10px; /* 오버레이와 겹치지 않도록 아래로 내리거나 다른 위치로 */
-    right: 10px; /* 우측 상단 */
+    top: 10px;
+    right: 10px;
     left: auto;
-    font-size: 0.75em; /* 약간 더 작게 */
+    font-size: 0.75em;
     padding: 4px 8px;
     min-width: 100px;
-    background-color: rgba(0, 0, 0, 0.8); /* 배경 더 진하게 */
+    background-color: rgba(0, 0, 0, 0.8);
   }
-
   .live-ranking h3 {
     font-size: 0.85em;
   }
@@ -349,29 +334,41 @@ body {
     font-size: 0.8em;
     margin: 2px 0;
   }
-
   .results-overlay small {
     font-size: 0.75em;
     margin-top: 10px;
   }
 
-  /* 시간 멈춤 알림 모바일 위치/크기 조정 */
-  .time-freeze-notice {
-    bottom: 10px; /* 하단 여백 축소 */
-    font-size: 0.9em; /* 폰트 크기 축소 */
-    padding: 8px 15px; /* 패딩 축소 */
-    width: 90%; /* 너비 확장 */
+  /* 모바일 알림 스타일 */
+  .time-freeze-notice,
+  .knock-back-notice,
+  .first-to-last-notice,
+  .speed-boost-notice {
+    font-size: 0.9em;
+    padding: 8px 15px;
+    width: 90%;
     max-width: 400px;
     box-sizing: border-box;
-    white-space: normal; /* 모바일에선 줄바꿈 허용 */
+    white-space: normal;
+  }
+  .time-freeze-notice {
+    bottom: 10px;
+  }
+  .knock-back-notice {
+    bottom: 55px;
+  }
+  .first-to-last-notice {
+    bottom: 100px;
+  }
+  .speed-boost-notice {
+    bottom: 145px;
   }
 }
 
-/* 아주 작은 화면 (선택적 추가 조정) */
 @media (max-width: 380px) {
   .overlay {
     padding: 10px;
-    max-height: 50vh; /* 조금 더 높이 확보 */
+    max-height: 50vh;
   }
   .overlay h1,
   .overlay h2 {
@@ -399,8 +396,25 @@ body {
     top: 5px;
     right: 5px;
   }
-  .time-freeze-notice {
+
+  /* 가장 작은 화면 알림 */
+  .time-freeze-notice,
+  .knock-back-notice,
+  .first-to-last-notice,
+  .speed-boost-notice {
     font-size: 0.8em;
     padding: 6px 10px;
+  }
+  .time-freeze-notice {
+    bottom: 5px;
+  }
+  .knock-back-notice {
+    bottom: 45px;
+  }
+  .first-to-last-notice {
+    bottom: 85px;
+  }
+  .speed-boost-notice {
+    bottom: 125px;
   }
 }
