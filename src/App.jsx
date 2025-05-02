@@ -7,6 +7,7 @@ import { handleSkillEvents, SPEED_BOOST_FACTOR } from "./skills"; // 스킬 핸�
 import * as VideoRecorder from "./videoRecorder"; // 비디오 레코더 import (getDisplayMedia 버전 사용 가정)
 
 // --- 환경 설정 상수 ---
+const APP_URL = "https://lucky-draw-tawny.vercel.app/"; // 공유할 앱 URL
 const NUM_WINNERS = 3; // 최종 결과에 표시할 우승자 수
 const RACE_DISTANCE = 200; // 경주 거리 200m
 const BASE_SPEED = 0.14; // 기본 속도 배율
@@ -117,7 +118,7 @@ function App() {
     message: "",
   });
   const [isRecordingAvailable, setIsRecordingAvailable] = useState(false);
-  // const [isStarting, setIsStarting] = useState(false); // 필요하다면 시작 중 상태 추가
+  // const [isStarting, setIsStarting] = useState(false);
 
   // --- 참조 관리 ---
   const mountRef = useRef(null);
@@ -485,7 +486,7 @@ function App() {
     mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }, []);
 
-  // *** 수정된 설정 및 레이스 시작 핸들러 ***
+  // 설정 및 레이스 시작 핸들러
   const handleSetupAndStart = useCallback(async () => {
     // <<< async 추가
     console.log("App: Setup and Start button clicked.");
@@ -620,16 +621,13 @@ function App() {
       console.log("App: Three.js clock started.");
     }
     // setIsStarting(false); // (선택) 시작 완료 후 버튼 활성화
-
-    // *** 기존의 setTimeout으로 녹화 시작하는 부분은 제거됨 ***
   }, [
-    // 의존성 배열: 필요한 상태와 함수 포함
+    // 의존성 배열
     numPlayers,
     playerNamesInput,
     isRaceRunning,
     createRacers,
-    generateRandomNames, // 기본 로직
-    // 상태 setter는 일반적으로 ref를 통해 접근하므로 의존성 배열에 넣지 않아도 됨
+    generateRandomNames,
   ]);
 
   // 새 추첨 준비 핸들러
@@ -639,7 +637,7 @@ function App() {
       console.warn("App: Cannot prepare new setup while race is running.");
       return;
     }
-    // 진행 중인 녹화 중지 및 폐기 (stopRecording은 async이므로 Promise 처리)
+    // 진행 중인 녹화 중지 및 폐기
     if (VideoRecorder.getIsRecording()) {
       console.log("App: Stopping active recording for new setup...");
       VideoRecorder.stopRecording()
@@ -650,11 +648,11 @@ function App() {
         })
         .catch((err) => {
           console.error("App: Error stopping recording during prepare:", err);
-          VideoRecorder.discardRecording(); // 혹시 모르니 폐기 시도
+          VideoRecorder.discardRecording();
           setIsRecordingAvailable(false);
         });
     } else {
-      VideoRecorder.discardRecording(); // 녹화 데이터만 폐기
+      VideoRecorder.discardRecording();
       setIsRecordingAvailable(false);
       console.log("App: Current recording data discarded for new setup.");
     }
@@ -673,125 +671,113 @@ function App() {
     setFinalResults({ winner1: "---", winner2: "---", winner3: "---" });
     // 스킬 상태 초기화
     setIsTimeFrozen(false);
-    setFreezeInfo({
-      /*...*/
-    });
-    timeFreezerIdRef.current = null; /*...*/
+    setFreezeInfo({ freezerName: null, duration: 0, message: "" });
+    timeFreezerIdRef.current = null;
+    freezeStartTimeRef.current = null;
+    freezeDurationRef.current = 0;
     setIsKnockBackActive(false);
-    setKnockBackInfo({
-      /*...*/
-    });
-    knockBackStartTimeRef.current = null; /*...*/
+    setKnockBackInfo({ actorName: null, message: "" });
+    knockBackStartTimeRef.current = null;
     setIsFirstToLastActive(false);
-    setFirstToLastInfo({
-      /*...*/
-    });
-    firstToLastStartTimeRef.current = null; /*...*/
+    setFirstToLastInfo({ victimName: null, message: "" });
+    firstToLastStartTimeRef.current = null;
     setIsSpeedBoostActive(false);
-    setSpeedBoostInfo({
-      /*...*/
-    });
-    speedBoosterIdRef.current = null; /*...*/
+    setSpeedBoostInfo({ boosterName: null, message: "" });
+    speedBoosterIdRef.current = null;
+    boostEndTimeRef.current = null;
+    boostNotifyStartTimeRef.current = null;
     console.log("App: Skill states reset for new setup.");
   }, [isRaceRunning, clearRacers]);
 
-  // 레이스 종료 로직 (async/await 적용)
-  const finishRace = useCallback(
-    async () => {
-      if (isRaceFinishedRef.current) return;
-      console.log("App: Finishing race (async)...");
-      isRaceFinishedRef.current = true;
-      if (clockRef.current?.running) {
-        clockRef.current.stop();
-        console.log("App: Three.js clock stopped.");
-      }
-      if (animationFrameIdRef.current) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-        animationFrameIdRef.current = null;
-        console.log("App: Animation frame cancelled on finishRace.");
-      }
+  // 레이스 종료 로직
+  const finishRace = useCallback(async () => {
+    if (isRaceFinishedRef.current) return;
+    console.log("App: Finishing race (async)...");
+    isRaceFinishedRef.current = true;
+    if (clockRef.current?.running) {
+      clockRef.current.stop();
+      console.log("App: Three.js clock stopped.");
+    }
+    if (animationFrameIdRef.current) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = null;
+      console.log("App: Animation frame cancelled on finishRace.");
+    }
 
-      // 비디오 녹화 중지 및 대기 (녹화 중이었다면)
-      if (VideoRecorder.getIsRecording()) {
-        try {
-          console.log("App: Calling await VideoRecorder.stopRecording()...");
-          await VideoRecorder.stopRecording(); // <<< 녹화 완료 대기
-          console.log("App: VideoRecorder.stopRecording() promise resolved.");
-          const hasData = VideoRecorder.hasRecordedData();
-          isRecordingAvailableSetterRef.current(hasData); // <<< 완료 후 데이터 확인 및 상태 업데이트
-          console.log(
-            `App: Recording stopped confirmation. Data available: ${hasData}`
-          );
-        } catch (error) {
-          console.error("App: Error during stopRecording:", error);
-          isRecordingAvailableSetterRef.current(false);
-          alert("녹화 중지 중 오류가 발생했습니다.");
-        }
-      } else {
-        console.log("App: No active recording to stop.");
-        // 녹화가 시작되지 않았거나 이미 중지된 경우, 데이터 유무만 체크할 수 있음
+    // 비디오 녹화 중지 및 대기
+    if (VideoRecorder.getIsRecording()) {
+      try {
+        console.log("App: Calling await VideoRecorder.stopRecording()...");
+        await VideoRecorder.stopRecording();
+        console.log("App: VideoRecorder.stopRecording() promise resolved.");
         const hasData = VideoRecorder.hasRecordedData();
-        isRecordingAvailableSetterRef.current(hasData); // 이전에 폐기되지 않은 데이터가 있을 수도 있음
+        isRecordingAvailableSetterRef.current(hasData);
         console.log(
-          `App: Checked for existing recording data. Available: ${hasData}`
+          `App: Recording stopped confirmation. Data available: ${hasData}`
         );
+      } catch (error) {
+        console.error("App: Error during stopRecording:", error);
+        isRecordingAvailableSetterRef.current(false);
+        alert("녹화 중지 중 오류가 발생했습니다.");
       }
-
-      // 스킬 상태 초기화
-      isTimeFrozenSetterRef.current(false);
-      freezeInfoSetterRef.current({
-        /*...*/
-      });
-      timeFreezerIdRef.current = null; /*...*/
-      isKnockBackActiveSetterRef.current(false);
-      knockBackInfoSetterRef.current({
-        /*...*/
-      });
-      knockBackStartTimeRef.current = null; /*...*/
-      isFirstToLastActiveSetterRef.current(false);
-      firstToLastInfoSetterRef.current({
-        /*...*/
-      });
-      firstToLastStartTimeRef.current = null; /*...*/
-      isSpeedBoostActiveSetterRef.current(false);
-      speedBoostInfoSetterRef.current({
-        /*...*/
-      });
-      speedBoosterIdRef.current = null; /*...*/
-      console.log("App: Skill states reset after race finish.");
-
-      // 최종 순위 계산 및 결과 업데이트
-      const finalRanking = [...racersRef.current]
-        .filter((r) => r.finishTime >= 0)
-        .sort((a, b) => a.finishTime - b.finishTime);
-      finalResultsSetterRef.current({
-        winner1: finalRanking[0]?.name || "---",
-        winner2: finalRanking[1]?.name || "---",
-        winner3: finalRanking[2]?.name || "---",
-      });
+    } else {
+      console.log("App: No active recording to stop.");
+      const hasData = VideoRecorder.hasRecordedData();
+      isRecordingAvailableSetterRef.current(hasData);
       console.log(
-        "App: Final results calculated:",
-        finalRanking.slice(0, NUM_WINNERS).map((r) => r.name)
+        `App: Checked for existing recording data. Available: ${hasData}`
       );
+    }
 
-      // 레이서 시각 효과 초기화
-      racersRef.current.forEach((racer) => {
-        if (racer.labelSprite.material)
-          racer.labelSprite.material.color.set(DEFAULT_LABEL_COLOR);
-        racer.isBoosting = false; // 부스트 효과 확실히 제거
-      });
+    // 스킬 상태 초기화
+    isTimeFrozenSetterRef.current(false);
+    freezeInfoSetterRef.current({
+      freezerName: null,
+      duration: 0,
+      message: "",
+    });
+    timeFreezerIdRef.current = null;
+    freezeStartTimeRef.current = null;
+    freezeDurationRef.current = 0;
+    isKnockBackActiveSetterRef.current(false);
+    knockBackInfoSetterRef.current({ actorName: null, message: "" });
+    knockBackStartTimeRef.current = null;
+    isFirstToLastActiveSetterRef.current(false);
+    firstToLastInfoSetterRef.current({ victimName: null, message: "" });
+    firstToLastStartTimeRef.current = null;
+    isSpeedBoostActiveSetterRef.current(false);
+    speedBoostInfoSetterRef.current({ boosterName: null, message: "" });
+    speedBoosterIdRef.current = null;
+    boostEndTimeRef.current = null;
+    boostNotifyStartTimeRef.current = null;
+    console.log("App: Skill states reset after race finish.");
 
-      // UI 업데이트
-      showResultsSetterRef.current(true);
-      isRaceRunningSetterRef.current(false);
-      console.log(
-        "App: Results screen shown, race running state set to false."
-      );
-    },
-    [
-      /* 의존성 배열: setter ref는 일반적으로 불필요 */
-    ]
-  );
+    // 최종 순위 계산 및 결과 업데이트
+    const finalRanking = [...racersRef.current]
+      .filter((r) => r.finishTime >= 0)
+      .sort((a, b) => a.finishTime - b.finishTime);
+    finalResultsSetterRef.current({
+      winner1: finalRanking[0]?.name || "---",
+      winner2: finalRanking[1]?.name || "---",
+      winner3: finalRanking[2]?.name || "---",
+    });
+    console.log(
+      "App: Final results calculated:",
+      finalRanking.slice(0, NUM_WINNERS).map((r) => r.name)
+    );
+
+    // 레이서 시각 효과 초기화
+    racersRef.current.forEach((racer) => {
+      if (racer.labelSprite.material)
+        racer.labelSprite.material.color.set(DEFAULT_LABEL_COLOR);
+      racer.isBoosting = false;
+    });
+
+    // UI 업데이트
+    showResultsSetterRef.current(true);
+    isRaceRunningSetterRef.current(false);
+    console.log("App: Results screen shown, race running state set to false.");
+  }, []);
 
   // 툴팁 업데이트 로직
   const updateTooltip = useCallback(() => {
@@ -944,7 +930,6 @@ function App() {
       if (animationFrameIdRef.current)
         cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
-      // finishRace가 호출되었으므로 여기서는 추가 중지 로직 불필요
       return;
     }
 
@@ -994,7 +979,7 @@ function App() {
       const canMove =
         timeFreezerIdRef.current === null ||
         racer.id === timeFreezerIdRef.current;
-      racer.isBoosting = speedBoosterIdRef.current === racer.id; // 매 프레임 부스트 상태 업데이트
+      racer.isBoosting = speedBoosterIdRef.current === racer.id;
 
       if (!isRacerAlreadyFinished) {
         if (canMove && deltaTime > 0) {
@@ -1023,7 +1008,7 @@ function App() {
               racerMeshYBase + LABEL_Y_OFFSET + 0.5;
             racer.labelSprite.position.z = RACE_DISTANCE;
             racer.displaySpeed = 0;
-            racer.isBoosting = false; // 도착 시 부스트 해제
+            racer.isBoosting = false;
           } else {
             const bobY =
               Math.sin(
@@ -1039,11 +1024,10 @@ function App() {
           }
         } else {
           racer.displaySpeed = 0;
-        } // 움직일 수 없을 때 속도 0
+        }
       } else {
-        // 이미 도착한 레이서
         racer.displaySpeed = 0;
-        racer.isBoosting = false; // 부스트 해제
+        racer.isBoosting = false;
         racer.mesh.position.z = RACE_DISTANCE;
         racer.labelSprite.position.z = RACE_DISTANCE;
         racer.mesh.position.y = racerMeshYBase;
@@ -1052,7 +1036,7 @@ function App() {
 
       if (racer.finishTime >= 0) finishedCountInFrame++;
       updateNameLabel(racer.labelSprite, racer.name, racer.displaySpeed);
-      updateParticleSystem(racer, deltaTime, elapsedTime); // 파티클 업데이트
+      updateParticleSystem(racer, deltaTime, elapsedTime);
       leadingZ = Math.max(leadingZ, racer.mesh.position.z);
     });
 
@@ -1119,7 +1103,7 @@ function App() {
       console.log(
         `App/animate: All ${currentRacers.length} racers finished. Triggering finishRace...`
       );
-      finishRace(); // async 함수 호출 (await 안함)
+      finishRace();
     }
 
     // 툴팁 및 렌더링
@@ -1128,7 +1112,7 @@ function App() {
       rendererRef.current.render(sceneRef.current, cameraRef.current);
     }
 
-    // 다음 프레임 요청 (경주 종료되지 않았다면)
+    // 다음 프레임 요청
     if (!isRaceFinishedRef.current) {
       animationFrameIdRef.current = requestAnimationFrame(animate);
     } else {
@@ -1140,7 +1124,53 @@ function App() {
     updateNameLabel,
     updateParticleSystem,
     handleSkillEvents,
-  ]); // 의존성 추가
+  ]);
+
+  // --- 비디오 저장 버튼 클릭 핸들러 ---
+  const handleSaveVideo = () => {
+    console.log("App: Save video button clicked.");
+    if (!VideoRecorder.hasRecordedData()) {
+      console.warn("App: No recorded data to save.");
+      alert("저장할 녹화 영상 데이터가 없습니다.");
+      setIsRecordingAvailable(false);
+      return;
+    }
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.T-]/g, "")
+      .substring(0, 14);
+    const baseFilename = `RandomRacer_${timestamp}`;
+    VideoRecorder.saveRecording(baseFilename);
+    setIsRecordingAvailable(false);
+  };
+
+  // --- *** 결과 공유 핸들러 (클립보드) *** ---
+  const handleShareResults = useCallback(async () => {
+    const { winner1, winner2, winner3 } = finalResults;
+    const hasResults = winner1 !== "---";
+
+    if (!hasResults) {
+      alert("아직 추첨 결과가 없습니다!");
+      return;
+    }
+
+    const shareText = `🏆 랜덤 레이서 추첨 결과 🏆\n\n🥇: ${winner1}\n🥈: ${winner2}\n🥉: ${winner3}\n\n여기서 직접 해보세요! 👇\n${APP_URL}`;
+
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        alert("클립보드 복사 기능이 지원되지 않는 브라우저입니다.");
+        return;
+      }
+      await navigator.clipboard.writeText(shareText);
+      alert(
+        "추첨 결과가 클립보드에 복사되었습니다!\n원하는 곳에 붙여넣기하여 공유하세요."
+      );
+      console.log("App: Results copied to clipboard.");
+    } catch (err) {
+      console.error("App: Failed to copy results to clipboard:", err);
+      alert("결과를 클립보드에 복사하는 데 실패했습니다.");
+    }
+  }, [finalResults]);
 
   // --- useEffect: Three.js 초기화 및 정리 ---
   useEffect(() => {
@@ -1169,7 +1199,6 @@ function App() {
     cameraRef.current.position.copy(initialCameraPosition);
     cameraRef.current.lookAt(0, 0, 0);
     try {
-      // preserveDrawingBuffer는 이제 getDisplayMedia 사용 시 필요 없을 수 있음. 성능 고려 시 false로 변경 가능.
       rendererRef.current = new THREE.WebGLRenderer({
         antialias: true,
         preserveDrawingBuffer: false,
@@ -1187,7 +1216,7 @@ function App() {
       return;
     }
 
-    clockRef.current = new THREE.Clock(false); // 자동 시작 안 함
+    clockRef.current = new THREE.Clock(false);
     // 조명 설정
     const ambientLight = new THREE.AmbientLight(0xcccccc, 0.6);
     sceneRef.current.add(ambientLight);
@@ -1278,14 +1307,14 @@ function App() {
         cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
 
-      // 녹화 정리 (진행 중이면 중지 및 폐기)
+      // 녹화 정리
       if (VideoRecorder.getIsRecording()) {
         VideoRecorder.stopRecording().catch((err) =>
           console.warn("Cleanup: Error stopping recording:", err)
         );
       }
-      VideoRecorder.discardRecording(); // 녹화 데이터 확실히 폐기
-      setIsRecordingAvailable(false); // 상태 초기화
+      VideoRecorder.discardRecording();
+      setIsRecordingAvailable(false);
       console.log("App: Video recording stopped/discarded on cleanup.");
 
       // 마커 정리
@@ -1350,12 +1379,11 @@ function App() {
       console.log(
         "App: useEffect[isRaceRunning]: Race started, starting animation loop."
       );
-      isRaceFinishedRef.current = false; // 시작 시 항상 false
+      isRaceFinishedRef.current = false;
       if (animationFrameIdRef.current)
-        cancelAnimationFrame(animationFrameIdRef.current); // 중복 방지
+        cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = requestAnimationFrame(animate);
     } else {
-      // isRaceRunning이 false일 때 (초기 상태, 레이스 종료 후 등)
       if (animationFrameIdRef.current) {
         console.log(
           "App: useEffect[isRaceRunning]: Race stopped or not started, cancelling animation frame."
@@ -1363,22 +1391,17 @@ function App() {
         cancelAnimationFrame(animationFrameIdRef.current);
         animationFrameIdRef.current = null;
       }
-      // 레이스가 명시적으로 종료된 것이 아니라 isRaceRunning만 false가 되었을 때
-      // (예: prepareForNewSetup 호출 시) 녹화 중단 로직은 prepareForNewSetup에서 처리.
-      // finishRace 호출 시 녹화 중단은 finishRace 내부에서 처리.
     }
-    // 컴포넌트 언마운트 또는 isRaceRunning 변경 시 cleanup
     return () => {
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current);
         animationFrameIdRef.current = null;
       }
     };
-  }, [isRaceRunning, animate]); // isRaceRunning 변경 시 실행
+  }, [isRaceRunning, animate]);
 
   // --- useEffect: 상태 설정 함수 참조 업데이트 ---
   useEffect(() => {
-    // 매 렌더링 후 setter ref 업데이트 (상태 변경 시 콜백에서 최신 setter 사용 목적)
     liveRankingSetterRef.current = setLiveRanking;
     finalResultsSetterRef.current = setFinalResults;
     isRaceRunningSetterRef.current = setIsRaceRunning;
@@ -1392,25 +1415,7 @@ function App() {
     isSpeedBoostActiveSetterRef.current = setIsSpeedBoostActive;
     speedBoostInfoSetterRef.current = setSpeedBoostInfo;
     isRecordingAvailableSetterRef.current = setIsRecordingAvailable;
-  }); // 의존성 배열 없음: 매 렌더링마다 실행
-
-  // --- 비디오 저장 버튼 클릭 핸들러 ---
-  const handleSaveVideo = () => {
-    console.log("App: Save video button clicked.");
-    if (!VideoRecorder.hasRecordedData()) {
-      console.warn("App: No recorded data to save.");
-      alert("저장할 녹화 영상 데이터가 없습니다.");
-      setIsRecordingAvailable(false); // 확실하게 비활성화
-      return;
-    }
-    const timestamp = new Date()
-      .toISOString()
-      .replace(/[:.T-]/g, "")
-      .substring(0, 14);
-    const baseFilename = `RandomRacer_${timestamp}`; // 확장자 제외
-    VideoRecorder.saveRecording(baseFilename); // videoRecorder가 확장자(.mp4 또는 .webm) 결정
-    setIsRecordingAvailable(false); // 저장 시도 후 비활성화
-  };
+  }); // 매 렌더링 시 업데이트
 
   // --- JSX 렌더링 구조 ---
   return (
@@ -1426,7 +1431,7 @@ function App() {
             value={numPlayers}
             onChange={handleNumPlayersChange}
             min="2"
-            disabled={isRaceRunning /*|| isStarting*/}
+            disabled={isRaceRunning}
           />
         </div>
         <div className="input-group">
@@ -1437,14 +1442,14 @@ function App() {
             placeholder="(한 줄에 한 명 / 미 입력 시 랜덤)"
             value={playerNamesInput}
             onChange={handleNamesChange}
-            disabled={isRaceRunning /*|| isStarting*/}
+            disabled={isRaceRunning}
           />
         </div>
         <button
           id="startButton"
           className="action-button"
           onClick={handleSetupAndStart}
-          disabled={isRaceRunning /*|| isStarting*/} // 레이스 진행 중 비활성화
+          disabled={isRaceRunning}
         >
           {isRaceRunning ? "추첨 진행 중..." : "설정 및 추첨 시작!"}
         </button>
@@ -1476,9 +1481,9 @@ function App() {
         >
           <button
             className="restart-button"
-            onClick={() => alert("카카오톡 공유 기능은 구현되지 않았습니다.")}
+            onClick={handleShareResults} // <<< 클립보드 공유 핸들러
           >
-            카카오톡 공유
+            결과 공유 (클립보드)
           </button>
           <button
             className="restart-button"
