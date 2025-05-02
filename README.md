@@ -1,12 +1,27 @@
-# React + Vite
+# Lucky Draw
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+경마처럼 진행되는 WebGL 기반의 재미있는 추첨 웹 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 🚀 배포 주소
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+[https://lucky-draw-tawny.vercel.app/](https://lucky-draw-tawny.vercel.app/)
 
-## Expanding the ESLint configuration
+## ✨ 주요 기능
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- 경마 스타일의 3D 추첨으로 시각적 재미 극대화
+- 각 말(참가자)들이 달리면서 랜덤하게 스킬 사용:
+  1. 뒤로 당기기
+  2. 시간 멈추기
+  3. 부스터 가속
+  4. 1등을 꼴등으로 전환
+- Three.js를 활용한 생동감 있는 3D 그래픽
+- 영상 녹화 및 클립보드 공유 기능 지원
+- 반응형 디자인으로 모바일/PC 등 다양한 디바이스 최적화
+- 경마장 분위기를 연출하는 다채로운 시각 효과
+
+## 🛠 기술 스택
+
+- React 19
+- Vite
+- Three.js
+- CSS3
